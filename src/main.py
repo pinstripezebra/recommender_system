@@ -11,10 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 # custom imports
-from models import User, Game, GameModel, UserModel, GameTags, GameTagsModel, UniqueGameTags, UniqueGameTagsModel, User_Game_Model, User_Game, GameSimilarity,GameSimilarityModel, UserRecommendation, UserRecommendationModel
+from src.models import User, Game, GameModel, UserModel,  UserGameModel, UserGame, GameSimilarity,GameSimilarityModel, UserRecommendation, UserRecommendationModel
 
-# Load the .env file from the parent directory
-config = dotenv_values("./.env2")
+
+config = dotenv_values(".env")
 
 # Load the database connection string from the environment variable
 DATABASE_URL = config["DATABASE_URL"]
@@ -81,12 +81,6 @@ async def fetch_products(asin: str = None, db: Session = Depends(get_db)):
 async def fetch_users(username: str, db: Session = Depends(get_db)):
     users = db.query(User).filter(User.username == username).all()
     return [UserModel.from_orm(user) for user in users]
-
-@app.get("/api/v1/genres/")
-async def fetch_game_tags(db: Session = Depends(get_db)):
-    # Query the database using the SQLAlchemy Game model
-    gametags = db.query(GameTags).all()
-    return [GameTagsModel.from_orm(gametag) for gametag in gametags]
 
 @app.get("/api/v1/similar_games/")
 async def fetch_similar_games(asin: str, db: Session = Depends(get_db)):

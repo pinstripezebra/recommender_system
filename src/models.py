@@ -115,6 +115,8 @@ class GameSimilarityModel(BaseModel):
         orm_mode = True  # Enable ORM mode to work with SQLAlchemy objects
         from_attributes = True # Enable attribute access for SQLAlchemy objects
 
+
+
 # UserRecommendation model for the database
 class UserRecommendation(Base):
     __tablename__ = "user_recommendations"  # Table name in the PostgreSQL database
