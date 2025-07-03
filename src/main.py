@@ -100,6 +100,34 @@ async def fetch_user_recommendation(username: str, db: Session = Depends(get_db)
     user_games = db.query(UserGame).filter(UserGame.username == username)
     return [UserGameModel.from_orm(user_game) for user_game in user_games]
 
+#-------------------------------------------------#
+# ----------PART 2: POST METHODS------------------#
+#-------------------------------------------------#
+
+
+@app.post("/api/v1/user_game/")
+async def create_user_game(user_game: UserGameModel, db: Session = Depends(get_db)):
+    # Check if the entry already exists
+    existing = db.query(UserGame).filter_by(username=user_game.username, asin=user_game.asin).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User already has this game.")
+
+    # Prepare data with defaults
+    user_game_data = {
+        "username": user_game.username,
+        "asin": user_game.asin,
+        "shelf": user_game.shelf if user_game.shelf is not None else "Wish_List",
+        "rating": user_game.rating if user_game.rating is not None else 0.0,
+        "review": user_game.review if user_game.review is not None else ""
+    }
+    if user_game.id is not None:
+        user_game_data["id"] = UUID(str(user_game.id))
+
+    db_user_game = UserGame(**user_game_data)
+    db.add(db_user_game)
+    db.commit()
+    db.refresh(db_user_game)
+    return db_user_game
 
 #-------------------------------------------------#
 # ----------PART 3: DELETE METHODS----------------#
