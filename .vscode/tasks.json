@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run FastAPI Server",
+			"type": "shell",
+			"command": "\"c:/Users/seelc/OneDrive/Desktop/Lucas Desktop Items/Projects/recommender_system/.venv/Scripts/python.exe\" -m uvicorn src.main:app --reload --host localhost --port 8000",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

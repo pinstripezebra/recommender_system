@@ -1,17 +1,17 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from uuid import uuid4, UUID
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from dotenv import dotenv_values
-from datetime import datetime, timedelta
 
 # security imports
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 
 # custom imports
 from src.models import User, Game, GameModel, UserModel,  UserGameModel, UserGame, GameSimilarity,GameSimilarityModel, UserRecommendation, UserRecommendationModel
+from src.similarity_pipeline import UserRecommendationService
 
 
 config = dotenv_values(".env")
@@ -55,15 +55,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Background task function
+def generate_recommendations_background(username: str, database_url: str):
+    """Background task to generate recommendations for a user"""
+    # Create a new database session for the background task
+    background_engine = create_engine(database_url)
+    BackgroundSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=background_engine)
+    
+    db = BackgroundSessionLocal()
+    try:
+        recommendation_service = UserRecommendationService(db, database_url)
+        recommendation_service.generate_recommendations_for_user(username)
+    finally:
+        db.close()
 
 
 #-------------------------------------------------#
 # ----------PART 1: GET METHODS-------------------#
 #-------------------------------------------------#
-
-
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -106,7 +115,7 @@ async def fetch_user_recommendation(username: str, db: Session = Depends(get_db)
 
 
 @app.post("/api/v1/user_game/")
-async def create_user_game(user_game: UserGameModel, db: Session = Depends(get_db)):
+async def create_user_game(user_game: UserGameModel, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     # Check if the entry already exists
     existing = db.query(UserGame).filter_by(username=user_game.username, asin=user_game.asin).first()
     if existing:
@@ -123,11 +132,29 @@ async def create_user_game(user_game: UserGameModel, db: Session = Depends(get_d
     if user_game.id is not None:
         user_game_data["id"] = UUID(str(user_game.id))
 
+    # Save the user game to database
     db_user_game = UserGame(**user_game_data)
     db.add(db_user_game)
     db.commit()
     db.refresh(db_user_game)
+    
+    # Trigger background task to generate recommendations for this user
+    background_tasks.add_task(generate_recommendations_background, user_game.username, DATABASE_URL)
+    
     return db_user_game
+
+@app.post("/api/v1/generate_recommendations/")
+async def generate_recommendations_manually(username: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Manually trigger recommendation generation for a user"""
+    # Check if user exists in user_games table
+    user_games = db.query(UserGame).filter(UserGame.username == username).first()
+    if not user_games:
+        raise HTTPException(status_code=404, detail="User has no games in the system.")
+    
+    # Trigger background task
+    background_tasks.add_task(generate_recommendations_background, username, DATABASE_URL)
+    
+    return {"message": f"Recommendation generation started for user: {username}"}
 
 #-------------------------------------------------#
 # ----------PART 3: DELETE METHODS----------------#
