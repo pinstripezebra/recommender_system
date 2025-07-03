@@ -97,8 +97,8 @@ async def fetch_recommended_game(username: str, db: Session = Depends(get_db)):
 @app.get("/api/v1/user_game/")
 async def fetch_user_recommendation(username: str, db: Session = Depends(get_db)):
     # Query the database using the SQLAlchemyfor user_games
-    user_games = db.query(User_Game).filter(User_Game.username == username)
-    return [User_Game_Model.from_orm(user_game) for user_game in user_games]
+    user_games = db.query(UserGame).filter(UserGame.username == username)
+    return [UserGameModel.from_orm(user_game) for user_game in user_games]
 
 
 #-------------------------------------------------#
@@ -108,7 +108,7 @@ async def fetch_user_recommendation(username: str, db: Session = Depends(get_db)
 
 @app.delete("/api/v1/user_game/")
 async def delete_user_game(username: str, asin: str, db: Session = Depends(get_db)):
-    user_game = db.query(User_Game).filter_by(username=username, asin=asin).first()
+    user_game = db.query(UserGame).filter_by(username=username, asin=asin).first()
     if not user_game:
         raise HTTPException(status_code=404, detail="User game not found.")
     db.delete(user_game)
