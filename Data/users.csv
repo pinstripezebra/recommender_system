@@ -1,0 +1,3 @@
+id,username,password,email,role
+e66b57d8-65dc-493f-8415-70af966e5e95,admin_username,placeholder1,test1@gmail.com,admin
+0d1a2a5d-831b-4136-becd-3a6ee741fe90,user_username,placeholder1,test2@gmail.com,user
