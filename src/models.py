@@ -49,7 +49,7 @@ class GameModel(BaseModel):
 
 # This is the User model for the database
 class User(Base):
-    __tablename__ = "optigame_users"  # Table name in the PostgreSQL database
+    __tablename__ = "users"  # Table name in the PostgreSQL database
 
     id = Column(pg.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     username = Column(String, nullable=False)
@@ -73,7 +73,7 @@ class UserModel(BaseModel):
 
 # This user_id:game_id mapping model
 class UserGame(Base):
-    __tablename__ = "optigame_user_games"  # Table name in the PostgreSQL database
+    __tablename__ = "user_games"  # Table name in the PostgreSQL database
 
     id = Column(SA_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String, nullable=False)

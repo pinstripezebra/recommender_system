@@ -77,183 +77,55 @@ class DatabaseHandler:
         cursor.execute("DROP TABLE IF EXISTS {table_name}".format(table_name=table_name))
         self.conn.commit()
 
-    def populate_users_table(self,df):
 
-        """ Connect to the PostgreSQL database and populates user table with provided dataframe."""
-
-        # Create a cursor object
-        cursor = self.conn.cursor()
-
-        # Iterate over the rows of the DataFrame and insert each row into the table
-        for index, row in df.iterrows():
-            cursor.execute(
-                """INSERT INTO optigame_users (id, username, password, email, role)
-                VALUES (%s, %s, %s, %s, %s)""",
-                (
-                    str(row['id']),  # Convert UUID to string
-                    row['username'],
-                    row['password'],
-                    row['email'],
-                    row['role'],
-                )
-            )
-        self.conn.commit()
-        # Close the cursor and connection
-        cursor.close()
-
-    def populate_games_table(self,df):
-
-        """ Connect to the PostgreSQL database and updates the games table with
-        data from the input dataframe."""
-
-        # Create a cursor object
-        cursor = self.conn.cursor()
-
-        # Iterate over the rows of the DataFrame and insert each row into the table
-        for index, row in df.iterrows():
-            cursor.execute(
-                """INSERT INTO optigame_products (id, asin, title, price, rating, sales_volume, reviews_count, description, image_link)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                (
-                    str(row['id']),  # Convert UUID to string
-                    row['asin'],
-                    row['title'],
-                    row['price'],
-                    row['rating'],
-                    row['sales_volume'],
-                    row['reviews_count'],
-                    row['description'],
-                    row['image_link']
-                )
-            )
-        self.conn.commit()
-        # Close the cursor and connection
-        cursor.close()
-
-    def populate_game_tags_table(self,df):
-
-        """ Connect to the PostgreSQL database and updates the game tags table with
-        data from the input dataframe."""
-
-        # Create a cursor object
-        cursor = self.conn.cursor()
-
-        # Iterate over the rows of the DataFrame and insert each row into the table
-        for index, row in df.iterrows():
-            cursor.execute(
-                """INSERT INTO optigame_game_tags (id, asin, game_tags)
-                VALUES (%s, %s, %s)""",
-                (
-                    str(row['id']),  # Convert UUID to string
-                    row['asin'],
-                    row['game_tags']
-                )
-            )
-        self.conn.commit()
-        # Close the cursor and connection
-        cursor.close()
-
-    def populate_unique_game_tags_table(self,df):
-
-        """ Connect to the PostgreSQL database and updates the game tags table with unique
-        tags from the input dataframe."""
-
-        # Create a cursor object
-        cursor = self.conn.cursor()
-
-        # Iterate over the rows of the DataFrame and insert each row into the table
-        for index, row in df.iterrows():
-            cursor.execute(
-                """INSERT INTO optigame_unique_game_tags (id,  game_tags)
-                VALUES (%s,  %s)""",
-                (
-                    str(row['id']),  # Convert UUID to string
-                    row['game_tags']
-                )
-            )
-        self.conn.commit()
-        # Close the cursor and connection
-        cursor.close()
-
-    def populate_user_game_table(self,df):
-
-        """ Connect to the PostgreSQL database and updates the user game table with
-        data from the input dataframe."""
-
-        # Create a cursor object
-        cursor = self.conn.cursor()
-
-        # Iterate over the rows of the DataFrame and insert each row into the table
-        for index, row in df.iterrows():
-            cursor.execute(
-                """INSERT INTO optigame_user_games (id, username, asin, shelf, rating, review)
-                VALUES (%s, %s, %s,%s, %s, %s)""",
-                (
-                    str(row['id']),  # Convert UUID to string
-                    row['username'],
-                    row['asin'],
-                    row['shelf'],
-                    row['rating'],
-                    row['review']
-                )
-            )
-        self.conn.commit()
-        # Close the cursor and connection
-        cursor.close()
-
-    def populate_similarity_table(self, df):
-        """ Connect to the PostgreSQL database and updates the similarity table
-        data from the input dataframe."""
-
-        cursor = self.conn.cursor()
-
-        # Prepare the data as a list of tuples
-        data = [
-            (
-                str(row['id']),
-                row['game1'],
-                row['game2'],
-                row['similarity']
-            )
-            for _, row in df.iterrows()
-        ]
-
-        # Use execute_values for faster insert with large dataset
-        execute_values(
-            cursor,
-            """INSERT INTO game_similarity (id, game1, game2, similarity)
-            VALUES %s""",
-            data
-        )
-
-        self.conn.commit()
-        cursor.close()
-
-    def populate_user_recommendation(self, df):
-        """ Connect to the PostgreSQL database and updates the user recommendation table with
-        data from the input dataframe."""
-
-        cursor = self.conn.cursor()
-
-        # Prepare the data as a list of tuples
-        data = [
-            (
-                str(row['id']),
-                row['username'],
-                row['asin'],
-                row['similarity']
-            )
-            for _, row in df.iterrows()
-        ]
-
-        # Use execute_values for faster insert with large dataset
-        execute_values(
-            cursor,
-            """INSERT INTO user_recommendations (id, username, asin, similarity)
-            VALUES %s""",
-            data
-        )
-
-        self.conn.commit()
-        cursor.close()
+    def populate_table_dynamic(self, df, table_name):
+        """
+        More flexible function to populate any table dynamically.
+        This function constructs the INSERT query based on the DataFrame columns.
+        
+        Args:
+            df: DataFrame containing the data to insert
+            table_name: Name of the target table
+        """
+        if df.empty:
+            print(f"DataFrame is empty, no data to insert into {table_name}")
+            return
+        
+        try:
+            # Create a cursor object
+            cursor = self.conn.cursor()
+            
+            # Get column names from the DataFrame
+            columns = list(df.columns)
+            
+            # Create the INSERT query dynamically
+            columns_str = ', '.join(columns)
+            placeholders = ', '.join(['%s'] * len(columns))
+            query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+            
+            # Prepare data for insertion
+            data_tuples = []
+            for _, row in df.iterrows():
+                # Convert each row to a tuple, handling UUID conversion if needed
+                row_data = []
+                for col in columns:
+                    value = row[col]
+                    # Convert UUID objects to strings if needed
+                    if col == 'id' and hasattr(value, 'hex'):
+                        row_data.append(str(value))
+                    else:
+                        row_data.append(value)
+                data_tuples.append(tuple(row_data))
+            
+            # Execute the insertion
+            cursor.executemany(query, data_tuples)
+            self.conn.commit()
+            cursor.close()
+            
+            print(f"Successfully populated {table_name} table with {len(df)} records using dynamic method")
+            
+        except Exception as e:
+            print(f"Error populating {table_name} table: {e}")
+            if 'cursor' in locals():
+                cursor.close()
 
