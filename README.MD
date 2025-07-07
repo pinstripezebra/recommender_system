@@ -18,3 +18,32 @@ The recommendations workflow is ran as a FastAPI background task triggering elem
 5. Calculate cosine similarity
 6. Delete existing recommendations for user
 7. Insert new top-N recommendations
+
+# Initializing Database
+To initialize the database, follow these steps:
+
+1. **Clone the Repository**
+    ```bash
+    git clone https://github.com/your-username/recommender_system.git
+    cd recommender_system
+    ```
+
+2. **Install Dependencies**
+    Make sure you have Python 3.8+ installed. Then, install the required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. **Configure Environment Variables**
+    Set up your environment variables (such as database connection strings) as needed. You can create a `.env` file in the project root:
+    ```
+    DATABASE_URL=your_postgres_connection_string
+    ```
+
+4. **Run the Database Loader**
+    Execute the following command to run the initial database setup:
+    ```bash
+    python src/load_database.py
+    ```
+
+This will populate your PostgreSQL database with the necessary tables and initial data.
