@@ -66,7 +66,7 @@ engine.create_table(game_table_creation_query)
 engine.create_table(user_games_query)
 engine.create_table(recommendation_table_creation_query)
 
-# Add UUIDs to dataframes if they don't have them
+# Ensuring each row of each dataframe has a unique ID
 if 'id' not in users_df.columns:
     users_df['id'] = [str(uuid.uuid4()) for _ in range(len(users_df))]
 if 'id' not in games_df.columns:
@@ -81,3 +81,9 @@ engine.populate_table_dynamic(users_df, 'optigame_users')
 engine.populate_table_dynamic(games_df, 'optigame_products')
 engine.populate_table_dynamic(user_games_df, 'optigame_user_games')
 engine.populate_table_dynamic(user_recommendations_df, 'user_recommendations')
+
+# Testing if the tables were created and populated correctly
+print(engine.test_table('optigame_users'))
+print(engine.test_table('optigame_products'))
+print(engine.test_table('optigame_user_games'))
+print(engine.test_table('user_recommendations'))

@@ -129,3 +129,52 @@ class DatabaseHandler:
             if 'cursor' in locals():
                 cursor.close()
 
+    def test_table(self, table_name: str) -> dict:
+        """
+        Test if a table exists and whether it contains data.
+        
+        Args:
+            table_name: Name of the table to test
+            
+        Returns:
+            dict: Dictionary with keys 'table_exists' and 'table_has_data' (both Boolean)
+        """
+        result = {
+            'table_exists': False,
+            'table_has_data': False
+        }
+        
+        try:
+            cursor = self.conn.cursor()
+            
+            # Check if table exists
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    AND table_name = %s
+                );
+            """, (table_name,))
+            
+            table_exists = cursor.fetchone()[0]
+            result['table_exists'] = table_exists
+            
+            # If table exists, check if it has data
+            if table_exists:
+                cursor.execute(f"SELECT COUNT(*) FROM {table_name};")
+                row_count = cursor.fetchone()[0]
+                result['table_has_data'] = row_count > 0
+                
+                print(f"Table '{table_name}': Exists={table_exists}, Has data={result['table_has_data']} ({row_count} rows)")
+            else:
+                print(f"Table '{table_name}': Does not exist")
+            
+            cursor.close()
+            return result
+            
+        except Exception as e:
+            print(f"Error testing table '{table_name}': {e}")
+            if 'cursor' in locals():
+                cursor.close()
+            return result
+
