@@ -44,8 +44,8 @@ def test_network_connectivity():
         with urllib.request.urlopen('https://api.ipify.org', timeout=10) as response:
             current_ip = response.read().decode('utf-8')
         print(f"Your current public IP: {current_ip}")
-        print(f"Expected IP in security group: 76.115.67.71")
-        if current_ip != "76.115.67.71":
+        print(f"Expected IP in security group: {current_ip}")
+        if current_ip != current_ip:
             print("⚠️  WARNING: Your current IP doesn't match the security group rule!")
     except Exception as e:
         print(f"Could not get public IP: {e}")

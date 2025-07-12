@@ -73,9 +73,7 @@ user_games_query = """CREATE TABLE IF NOT EXISTS user_games (
     asin VARCHAR(255) NOT NULL,
     shelf VARCHAR(50) DEFAULT 'Wish_List',
     rating FLOAT DEFAULT 0.0,
-    review TEXT,
-    FOREIGN KEY (username) REFERENCES users(username),
-    FOREIGN KEY (asin) REFERENCES games(asin)
+    review TEXT
     )
     """
 recommendation_table_creation_query = """CREATE TABLE IF NOT EXISTS user_recommendations (
@@ -95,6 +93,14 @@ game_tags_creation_query = """CREATE TABLE IF NOT EXISTS game_tags (
 
 
 # Running queries to create tables
+# Drop tables if they exist (in reverse dependency order)
+engine.delete_table('user_recommendations')
+engine.delete_table('user_games')
+engine.delete_table('game_tags')
+engine.delete_table('games')
+engine.delete_table('users')
+
+# Create tables
 engine.create_table(user_table_creation_query)
 engine.create_table(game_table_creation_query)
 engine.create_table(user_games_query)
@@ -114,15 +120,15 @@ if 'id' not in game_tags_df.columns:
     game_tags_df['id'] = [str(uuid.uuid4()) for _ in range(len(game_tags_df))]
 
 # Populates the 4 tables with data from the dataframes
-engine.populate_table_dynamic(users_df, 'optigame_users')
-engine.populate_table_dynamic(games_df, 'optigame_products')
-engine.populate_table_dynamic(user_games_df, 'optigame_user_games')
+engine.populate_table_dynamic(users_df, 'users')
+engine.populate_table_dynamic(games_df, 'games')
+engine.populate_table_dynamic(user_games_df, 'user_games')
 engine.populate_table_dynamic(user_recommendations_df, 'user_recommendations')
 engine.populate_table_dynamic(game_tags_df, 'game_tags')
 
 # Testing if the tables were created and populated correctly
-print(engine.test_table('optigame_users'))
-print(engine.test_table('optigame_products'))
-print(engine.test_table('optigame_user_games'))
+print(engine.test_table('users'))
+print(engine.test_table('games'))
+print(engine.test_table('user_games'))
 print(engine.test_table('user_recommendations'))
 print(engine.test_table('game_tags'))
