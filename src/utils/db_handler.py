@@ -5,8 +5,8 @@ import os
 from psycopg2.extras import execute_values
 import uuid
 
-# Load environment variables from .env2 file
-load_dotenv(dotenv_path=".env2")
+# Load environment variables from .env file
+load_dotenv()
 
 class DatabaseHandler:
     """Class to handle PostgreSQL database connection and operations"""

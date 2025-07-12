@@ -2,13 +2,39 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 import os
+from dotenv import load_dotenv
 from utils.db_handler import DatabaseHandler
 import pandas as pd
 import uuid
+import sys
+from sqlalchemy.exc import OperationalError
+import psycopg2
 
+# Load environment variables from .env file (override=True reloads changed values)
+load_dotenv(override=True)
 
-# establishing the database connection
-URL_database = os.environ.get("POST_DB_LINK")
+# Debug: Print loaded environment variables
+print("=== Environment Variables ===")
+print(f"db_instance_identifier: {os.environ.get('db_instance_identifier')}")
+print(f"master_username: {os.environ.get('master_username')}")
+print(f"password: {'*' * len(os.environ.get('password', '')) if os.environ.get('password') else 'NOT SET'}")
+print(f"RDS_ENDPOINT: {os.environ.get('RDS_ENDPOINT')}")
+print(f"RDS_PORT: {os.environ.get('RDS_PORT', '5432')}")
+print(f"RDS_DATABASE: {os.environ.get('RDS_DATABASE', 'postgres')}")
+print("============================")
+
+# Get AWS RDS connection details from environment variables
+db_identifier = os.environ.get("db_instance_identifier")
+master_username = os.environ.get("master_username")
+password = os.environ.get("password")
+rds_endpoint = os.environ.get("RDS_ENDPOINT")
+rds_port = os.environ.get("RDS_PORT", "5432")
+rds_database = os.environ.get("RDS_DATABASE", "postgres")
+
+# Construct PostgreSQL connection URL for RDS
+URL_database = f"postgresql://{master_username}:{password}@{rds_endpoint}:{rds_port}/{rds_database}"
+
+# Initialize DatabaseHandler with the constructed URL
 engine = DatabaseHandler(URL_database)
 
 # loading initial user data
