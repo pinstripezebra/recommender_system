@@ -18,8 +18,6 @@ config = dotenv_values(".env")
 
 # Load the database connection string from the environment variable
 DATABASE_URL = config["DATABASE_URL"]
-USER_TABLE = config["USER_TABLE"]
-
 
 # Initialize the database connection
 engine = create_engine(DATABASE_URL)
@@ -40,13 +38,9 @@ def get_db():
 # Initialize the FastAPI app
 app = FastAPI(title="Game Store API", version="1.0.0")
 
-# secure the API with OAuth2
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 # Add CORS middleware to allow requests 
-origins = ["http://localhost:8000", 
-           "http://localhost:5174", 
-           "http://localhost:5173"]
+origins = ["http://localhost:8000"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  

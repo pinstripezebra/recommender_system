@@ -19,7 +19,7 @@ class UserRecommendationService:
 
     def fetch_user_games(self, username: str) -> pd.DataFrame:
         """Fetch all games for a specific user"""
-        query = text("SELECT username, asin FROM optigame_user_games WHERE username = :username")
+        query = text("SELECT username, asin FROM user_games WHERE username = :username")
         with self.engine.connect() as conn:
             result = conn.execute(query, {"username": username})
             data = result.fetchall()
@@ -27,7 +27,7 @@ class UserRecommendationService:
 
     def fetch_all_game_tags(self) -> pd.DataFrame:
         """Fetch all game tags"""
-        query = text("SELECT asin, game_tags FROM optigame_game_tags")
+        query = text("SELECT asin, game_tags FROM game_tags")
         with self.engine.connect() as conn:
             result = conn.execute(query)
             data = result.fetchall()
