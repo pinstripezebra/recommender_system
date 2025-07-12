@@ -1,1 +1,8 @@
 uvicorn src.main:app --reload
+
+Create docker image
+docker build -t recommendersystem .
+
+
+Push to dockerhub
+docker push seelucas/recommendersystem

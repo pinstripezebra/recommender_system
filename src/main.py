@@ -3,7 +3,11 @@ from uuid import uuid4, UUID
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from dotenv import dotenv_values
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
 
 # security imports
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,13 +17,9 @@ from fastapi.security import OAuth2PasswordBearer
 from src.models import User, Game, GameModel, UserModel,  UserGameModel, UserGame, GameSimilarity,GameSimilarityModel, UserRecommendation, UserRecommendationModel
 from src.similarity_pipeline import UserRecommendationService
 
+# Load the database connection string from environment variable or .env file
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-config = dotenv_values(".env")
-
-# Load the database connection string from the environment variable
-DATABASE_URL = config["DATABASE_URL"]
-
-# Initialize the database connection
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

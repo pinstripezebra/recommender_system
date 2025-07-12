@@ -1,3 +1,5 @@
 .env
 .venv
+application.py
+fastapi-deployment.zip
 src/__pycache__
