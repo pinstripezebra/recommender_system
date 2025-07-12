@@ -16,6 +16,7 @@ users_df = pd.read_csv("Data/users.csv")
 games_df = pd.read_csv("Data/games.csv")
 user_games_df = pd.read_csv("Data/user_games.csv")
 user_recommendations_df = pd.read_csv("Data/user_recommendations.csv")
+game_tags_df = pd.read_csv("Data/game_tags.csv")
 
 
 # Defining queries to create tables
@@ -59,11 +60,20 @@ recommendation_table_creation_query = """CREATE TABLE IF NOT EXISTS user_recomme
     )
     """
 
+game_tags_creation_query = """CREATE TABLE IF NOT EXISTS game_tags (
+    id UUID PRIMARY KEY,
+    tag VARCHAR(255) NOT NULL
+    )
+    """
+
+
+
 # Running queries to create tables
 engine.create_table(user_table_creation_query)
 engine.create_table(game_table_creation_query)
 engine.create_table(user_games_query)
 engine.create_table(recommendation_table_creation_query)
+engine.create_table(game_tags_creation_query)
 
 # Ensuring each row of each dataframe has a unique ID
 if 'id' not in users_df.columns:
@@ -74,15 +84,19 @@ if 'id' not in user_games_df.columns:
     user_games_df['id'] = [str(uuid.uuid4()) for _ in range(len(user_games_df))]
 if 'id' not in user_recommendations_df.columns:
     user_recommendations_df['id'] = [str(uuid.uuid4()) for _ in range(len(user_recommendations_df))]
+if 'id' not in game_tags_df.columns:
+    game_tags_df['id'] = [str(uuid.uuid4()) for _ in range(len(game_tags_df))]
 
 # Populates the 4 tables with data from the dataframes
 engine.populate_table_dynamic(users_df, 'optigame_users')
 engine.populate_table_dynamic(games_df, 'optigame_products')
 engine.populate_table_dynamic(user_games_df, 'optigame_user_games')
 engine.populate_table_dynamic(user_recommendations_df, 'user_recommendations')
+engine.populate_table_dynamic(game_tags_df, 'game_tags')
 
 # Testing if the tables were created and populated correctly
 print(engine.test_table('optigame_users'))
 print(engine.test_table('optigame_products'))
 print(engine.test_table('optigame_user_games'))
 print(engine.test_table('user_recommendations'))
+print(engine.test_table('game_tags'))
