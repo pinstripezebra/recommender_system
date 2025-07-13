@@ -3,6 +3,7 @@ uvicorn src.main:app --reload
 Create docker image
 docker build -t recommendersystem .
 
+docker tag recommendersystem seelucas/fastapi_tutorial:fastapi_on_render
 
 Push to dockerhub
-docker push seelucas/recommendersystem
+docker push seelucas/fastapi_tutorial:fastapi_on_render
