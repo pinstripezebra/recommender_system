@@ -20,6 +20,7 @@ from src.similarity_pipeline import UserRecommendationService
 # Load the database connection string from environment variable or .env file
 DATABASE_URL = os.environ.get("Internal_Database_Url")
 
+# creating connection to the database
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
