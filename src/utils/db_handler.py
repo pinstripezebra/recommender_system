@@ -122,10 +122,10 @@ class DatabaseHandler:
             self.conn.commit()
             cursor.close()
             
-            print(f"Successfully populated {table_name} table with {len(df)} records using dynamic method")
+            print(f" ✅ Successfully populated {table_name} table with {len(df)} records using dynamic method")
             
         except Exception as e:
-            print(f"Error populating {table_name} table: {e}")
+            print(f"❌ Error populating {table_name} table: {e}")
             if 'cursor' in locals():
                 cursor.close()
 
@@ -165,10 +165,10 @@ class DatabaseHandler:
                 row_count = cursor.fetchone()[0]
                 result['table_has_data'] = row_count > 0
                 
-                print(f"Table '{table_name}': Exists={table_exists}, Has data={result['table_has_data']} ({row_count} rows)")
+                print(f"✅  Table '{table_name}': Exists={table_exists}, Has data={result['table_has_data']} ({row_count} rows)")
             else:
-                print(f"Table '{table_name}': Does not exist")
-            
+                print(f"❌  Table '{table_name}': Does not exist")
+
             cursor.close()
             return result
             

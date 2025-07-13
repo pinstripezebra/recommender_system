@@ -10,11 +10,11 @@ import sys
 from sqlalchemy.exc import OperationalError
 import psycopg2
 
-# Load environment variables from .env file (override=True reloads changed values)
+# Load environment variables from .env file
 load_dotenv(override=True)
 
-# Construct PostgreSQL connection URL for RDS
-URL_database = os.environ.get("Internal_Database_Url")
+# Construct PostgreSQL connection URL for Render
+URL_database = os.environ.get("External_Database_Url")
 
 # Initialize DatabaseHandler with the constructed URL
 engine = DatabaseHandler(URL_database)
