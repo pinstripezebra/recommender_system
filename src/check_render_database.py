@@ -13,7 +13,7 @@ import psycopg2
 # Load environment variables from .env file (override=True reloads changed values)
 load_dotenv(override=True)
 
-# Debug: Print loaded environment variables
+# loaidng external database URL
 database_url = os.environ.get("External_Database_Url")
 
 if not database_url:
@@ -47,7 +47,7 @@ def test_network_connectivity():
     # 1. Test DNS resolution
     try:
         ip_address = socket.gethostbyname(db_params['host'])
-        print(f"✅ DNS Resolution successful: {db_params['host']} → {ip_address}")
+        print(f"✅ DNS Resolution successful")
     except socket.gaierror as e:
         print(f"❌ DNS Resolution failed: {e}")
         return False
@@ -60,10 +60,10 @@ def test_network_connectivity():
         sock.close()
         
         if result == 0:
-            print(f"✅ Port {db_params['port']} is accessible on {db_params['host']}")
+            print(f"✅ Port {db_params['port']} is accessible")
             return True
         else:
-            print(f"❌ Port {db_params['port']} is NOT accessible on {db_params['host']}")
+            print(f"❌ Port {db_params['port']} is NOT accessible")
             print("   This might indicate a network connectivity issue")
             return False
     except Exception as e:
@@ -130,5 +130,5 @@ except Exception as e:
 
 # If we get here, connection was successful, so exit the test
 print(f"\n✅ All tests passed! Render PostgreSQL connection is working.")
-print(f"✅ Connected to database: {db_params['database']} on {db_params['host']}")
+print(f"✅ Connected to database: {db_params['database']}")
 print("✅ Ready for use in your application!")
