@@ -72,6 +72,7 @@ def generate_recommendations_background(username: str, database_url: str):
 async def root():
     return {"message": "Hello World"}
 
+
 @app.get("/api/v1/games/")
 async def fetch_products(asin: str = None, db: Session = Depends(get_db)):
     # Query the database using the SQLAlchemy Game model
@@ -80,6 +81,11 @@ async def fetch_products(asin: str = None, db: Session = Depends(get_db)):
     else:
         products = db.query(Game).all()
     return [GameModel.from_orm(product) for product in products]
+
+@app.get("/api/v1/all_users/")
+async def fetch_all_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return [UserModel.from_orm(user) for user in users]
 
 @app.get("/api/v1/users/")
 async def fetch_users(username: str, db: Session = Depends(get_db)):
