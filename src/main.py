@@ -105,7 +105,7 @@ async def fetch_recommended_game(username: str, db: Session = Depends(get_db)):
     return [UserRecommendationModel.from_orm(recommendation) for recommendation in user_recommendations]
 
 @app.get("/api/v1/user_game/")
-async def fetch_user_recommendation(username: str, db: Session = Depends(get_db)):
+async def fetch_user_game(username: str, db: Session = Depends(get_db)):
     # Query the database using the SQLAlchemyfor user_games
     user_games = db.query(UserGame).filter(UserGame.username == username)
     return [UserGameModel.from_orm(user_game) for user_game in user_games]

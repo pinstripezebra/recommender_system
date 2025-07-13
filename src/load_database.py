@@ -68,7 +68,8 @@ recommendation_table_creation_query = """CREATE TABLE IF NOT EXISTS user_recomme
 
 game_tags_creation_query = """CREATE TABLE IF NOT EXISTS game_tags (
     id UUID PRIMARY KEY,
-    tag VARCHAR(255) NOT NULL
+    asin VARCHAR(255) NOT NULL,
+    game_tags VARCHAR(255) NOT NULL
     )
     """
 

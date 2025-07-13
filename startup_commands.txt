@@ -1,8 +1,10 @@
+For Starting FastAPI app locally
 uvicorn src.main:app --reload
 
-Create docker image
+Create docker image named recommendersystem
 docker build -t recommendersystem .
 
+Tagging image to user/project:image_name
 docker tag recommendersystem seelucas/fastapi_tutorial:fastapi_on_render
 
 Push to dockerhub
