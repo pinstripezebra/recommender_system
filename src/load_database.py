@@ -76,7 +76,6 @@ game_tags_creation_query = """CREATE TABLE IF NOT EXISTS game_tags (
 
 
 # Running queries to create tables
-# Drop tables if they exist (in reverse dependency order)
 engine.delete_table('user_recommendations')
 engine.delete_table('user_games')
 engine.delete_table('game_tags')
