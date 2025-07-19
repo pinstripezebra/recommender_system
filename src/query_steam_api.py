@@ -110,11 +110,41 @@ def get_game_data(game_df, n_games=2000):
     else:
         print("No game data was successfully retrieved.")
         return pd.DataFrame()
+    
+def pivot_tags(df):
+    """
+        Pivot the dataframe so each appid-category pair is a separate row.
 
+        Args:
+            df (pd.DataFrame): DataFrame with at least 'appid' and 'categories' columns.
+                               The 'categories' column should be a comma-separated string.
 
+        Returns:
+            pd.DataFrame: DataFrame with columns 'appid' and 'category', one row per appid-category pair.
+    """
+    # Ensure categories column is a list (if it's a comma-separated string, split it)
+    def parse_categories(categories):
+        if isinstance(categories, list):
+            return categories
+        elif isinstance(categories, str):
+            return [c.strip() for c in categories.split(',') if c.strip()]
+        else:
+            return []
 
+    df = df[['appid', 'categories']].copy()
+    df['categories'] = df['categories'].apply(parse_categories)
+    pivoted = df.explode('categories').rename(columns={'categories': 'category'})
+    pivoted = pivoted.dropna(subset=['category'])
+    pivoted = pivoted[pivoted['category'] != '']
+    return pivoted.reset_index(drop=True)
+
+# calling methods
 game_df = get_all_games()
-game_info_df = get_game_data(game_df, n_games = 2000)
+game_info_df = get_game_data(game_df, n_games = 10)
+
 # writing to csv
 game_info_df.to_csv("Data/steam_games.csv", index=False)
-print(game_info_df.head())
+
+# generating tags dataframe
+game_tags_df = pivot_tags(game_info_df)
+game_tags_df.to_csv("Data/steam_game_tags.csv", index=False)
