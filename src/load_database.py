@@ -20,11 +20,11 @@ URL_database = os.environ.get("External_Database_Url")
 engine = DatabaseHandler(URL_database)
 
 # loading initial user data
-users_df = pd.read_csv("Data/users.csv")
-games_df = pd.read_csv("Data/games.csv")
-user_games_df = pd.read_csv("Data/user_games.csv")
+users_df = pd.read_csv("Data/steam_users.csv")
+games_df = pd.read_csv("Data/steam_games.csv")
+user_games_df = pd.read_csv("Data/steam_user_games.csv")
 user_recommendations_df = pd.read_csv("Data/user_recommendations.csv")
-game_tags_df = pd.read_csv("Data/game_tags.csv")
+game_tags_df = pd.read_csv("Data/steam_game_tags.csv")
 
 
 # Defining queries to create tables
@@ -38,21 +38,28 @@ user_table_creation_query = """CREATE TABLE IF NOT EXISTS users (
     """
 game_table_creation_query = """CREATE TABLE IF NOT EXISTS games (
     id UUID PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    price FLOAT NOT NULL,
-    rating FLOAT,
-    sales_volume VARCHAR(255),
-    reviews_count INTEGER,
-    asin VARCHAR(255) UNIQUE NOT NULL,
-    image_link VARCHAR(255)
+    appid VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(255),
+    is_free BOOLEAN DEFAULT FALSE,
+    short_description TEXT,
+    detailed_description TEXT,
+    developers VARCHAR(255),
+    publishers VARCHAR(255),
+    price VARCHAR(255),
+    genres VARCHAR(255),
+    categories VARCHAR(255),
+    release_date VARCHAR(255),
+    platforms TEXT,
+    metacritic_score FLOAT,
+    recommendations INTEGER
     )
     """
 
 user_games_query = """CREATE TABLE IF NOT EXISTS user_games (
     id UUID PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
-    asin VARCHAR(255) NOT NULL,
+    appid VARCHAR(255) NOT NULL,
     shelf VARCHAR(50) DEFAULT 'Wish_List',
     rating FLOAT DEFAULT 0.0,
     review TEXT
@@ -61,15 +68,15 @@ user_games_query = """CREATE TABLE IF NOT EXISTS user_games (
 recommendation_table_creation_query = """CREATE TABLE IF NOT EXISTS user_recommendations (
     id UUID PRIMARY KEY,
     username VARCHAR(255),
-    asin VARCHAR(255),
+    appid VARCHAR(255),
     similarity FLOAT
     )
     """
 
 game_tags_creation_query = """CREATE TABLE IF NOT EXISTS game_tags (
     id UUID PRIMARY KEY,
-    asin VARCHAR(255) NOT NULL,
-    game_tags VARCHAR(255) NOT NULL
+    appid VARCHAR(255) NOT NULL,
+    category VARCHAR(255) NOT NULL
     )
     """
 
