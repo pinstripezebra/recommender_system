@@ -15,32 +15,44 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 # Initialize the base class for SQLAlchemy models
 Base = declarative_base()
 
-# This is the game model for the database
-# we have separate classes for the pydantic model and the SQLAlchemy model
+# This is the Game model for the database
 class Game(Base):
     __tablename__ = "optigame_products"  # Table name in the PostgreSQL database
 
     id = Column(pg.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    title = Column(String, nullable=False)
-    description = Column(String, nullable=True)
-    price = Column(Float, nullable=False)
-    rating = Column(Float, nullable=True)
-    sales_volume = Column(String, nullable=True)
-    reviews_count = Column(Integer, nullable=True)
-    asin = Column(String, unique=True, nullable=False)
-    image_link = Column(String, nullable=True)
-
+    appid = Column(String, unique=True, nullable=False)  
+    name = Column(String, nullable=False)  
+    type = Column(String, nullable=True)  
+    is_free = Column(pg.BOOLEAN, nullable=True, default=False)  #
+    short_description = Column(String, nullable=True)  
+    detailed_description = Column(String, nullable=True)  
+    developers = Column(String, nullable=True)  
+    publishers = Column(String, nullable=True)  
+    price = Column(String, nullable=True)  
+    genres = Column(String, nullable=True)  
+    categories = Column(String, nullable=True)  
+    release_date = Column(String, nullable=True)  
+    platforms = Column(String, nullable=True)  
+    metacritic_score = Column(Float, nullable=True)  
+    recommendations = Column(Integer, nullable=True)  
 
 class GameModel(BaseModel):
-    id: Optional[UUID]
-    title: str
-    description: Optional[str]
-    price: float
-    rating: Optional[float]
-    sales_volume: Optional[str]
-    reviews_count: Optional[int]
-    asin: str
-    image_link: str
+    id: Optional[UUID] = None
+    appid: str
+    name: str
+    type: Optional[str] = None
+    is_free: Optional[bool] = False
+    short_description: Optional[str] = None
+    detailed_description: Optional[str] = None
+    developers: Optional[str] = None
+    publishers: Optional[str] = None
+    price: Optional[str] = None
+    genres: Optional[str] = None
+    categories: Optional[str] = None
+    release_date: Optional[str] = None
+    platforms: Optional[str] = None
+    metacritic_score: Optional[float] = None
+    recommendations: Optional[int] = None
 
     class Config:
         orm_mode = True  # Enable ORM mode to work with SQLAlchemy objects
@@ -77,7 +89,7 @@ class UserGame(Base):
 
     id = Column(SA_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String, nullable=False)
-    asin = Column(String, nullable=False)
+    appid = Column(String, nullable=False)
     shelf = Column(String, nullable=False)
     rating = Column(Float, nullable=False)
     review = Column(String, nullable=False)
@@ -86,7 +98,7 @@ class UserGame(Base):
 class UserGameModel(BaseModel):
     id: Optional[UUID]  = None
     username: str
-    asin: str
+    appid: str
     shelf: Optional[str] = None
     rating: Optional[float] = None
     review: Optional[str] = None
@@ -123,21 +135,16 @@ class UserRecommendation(Base):
 
     id = Column(SA_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String, nullable=False)
-    asin = Column(String, nullable=False)
+    appid = Column(String, nullable=False)
     similarity = Column(Float, nullable=False)
     
 class UserRecommendationModel(BaseModel):
     id: Optional[UUID] = None
     username: str
-    asin: str
+    appid: str
     similarity: float
 
     class Config:
         orm_mode = True  # Enable ORM mode to work with SQLAlchemy objects
         from_attributes = True # Enable attribute access for SQLAlchemy objects
 
-
-# authentication
-class Token(BaseModel):
-    access_token: str
-    token_type: str

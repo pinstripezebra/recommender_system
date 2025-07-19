@@ -19,28 +19,28 @@ class UserRecommendationService:
 
     def fetch_user_games(self, username: str) -> pd.DataFrame:
         """Fetch all games for a specific user"""
-        query = text("SELECT username, asin FROM user_games WHERE username = :username")
+        query = text("SELECT username, appid FROM user_games WHERE username = :username")
         with self.engine.connect() as conn:
             result = conn.execute(query, {"username": username})
             data = result.fetchall()
-            return pd.DataFrame(data, columns=['username', 'asin'])
+            return pd.DataFrame(data, columns=['username', 'appid'])
 
-    def fetch_all_game_tags(self) -> pd.DataFrame:
+    def fetch_all_category(self) -> pd.DataFrame:
         """Fetch all game tags"""
-        query = text("SELECT asin, game_tags FROM game_tags")
+        query = text("SELECT appid, category FROM category")
         with self.engine.connect() as conn:
             result = conn.execute(query)
             data = result.fetchall()
-            return pd.DataFrame(data, columns=['asin', 'game_tags'])
+            return pd.DataFrame(data, columns=['appid', 'category'])
 
     def create_game_vectors(self, tag_df: pd.DataFrame) -> tuple[pd.DataFrame, List[str], List[str]]:
         """Create game vectors from tags"""
-        unique_tags = tag_df['game_tags'].drop_duplicates().sort_values().tolist()
-        unique_games = tag_df['asin'].drop_duplicates().sort_values().tolist()
+        unique_tags = tag_df['category'].drop_duplicates().sort_values().tolist()
+        unique_games = tag_df['appid'].drop_duplicates().sort_values().tolist()
         
         game_vectors = []
         for game in unique_games:
-            tags = tag_df[tag_df['asin'] == game]['game_tags'].tolist()
+            tags = tag_df[tag_df['appid'] == game]['category'].tolist()
             vector = [1 if tag in tags else 0 for tag in unique_tags]
             game_vectors.append(vector)
         
@@ -52,7 +52,7 @@ class UserRecommendationService:
             return pd.DataFrame([[0] * len(unique_tags)], columns=unique_tags, index=['unknown_user'])
         
         username = user_games_df.iloc[0]['username']
-        user_games = user_games_df['asin'].tolist()
+        user_games = user_games_df['appid'].tolist()
         
         # Only keep games that exist in game_vectors
         user_games = [g for g in user_games if g in game_vectors.index]
@@ -78,10 +78,10 @@ class UserRecommendationService:
         top_games = similarity_df[username].nlargest(top_n)
         
         recommendations = []
-        for asin, similarity in top_games.items():
+        for appid, similarity in top_games.items():
             recommendations.append({
                 "username": username,
-                "asin": asin,
+                "appid": appid,
                 "similarity": float(similarity)
             })
         
@@ -98,7 +98,7 @@ class UserRecommendationService:
             recommendation = UserRecommendation(
                 id=uuid.uuid4(),
                 username=row['username'],
-                asin=row['asin'],
+                appid=row['appid'],
                 similarity=row['similarity']
             )
             self.db.add(recommendation)
@@ -116,7 +116,7 @@ class UserRecommendationService:
                 return
             
             # 2. Fetch all game tags
-            tag_df = self.fetch_all_game_tags()
+            tag_df = self.fetch_all_category()
             if tag_df.empty:
                 logger.error("No game tags found in database")
                 return
