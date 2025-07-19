@@ -1,10 +1,10 @@
-# Board Game Recommendation System
+# Steam Game Recommendation System
 
-A board game recommendation service built with **FastAPI**, **PostgreSQL**, and deployed on **Render**. This system uses content-based filtering to provide personalized game recommendations based on user preferences and game characteristics captured in tags.
+A Steam game recommendation service built with **FastAPI**, **PostgreSQL**, and deployed on **Render**. This system uses content-based filtering to provide personalized game recommendations based on user preferences and Steam game category tags.
 
 ## 🎯 Overview
 
-This project delivers an intelligent board game recommendation engine that analyzes user gaming history and game tags to suggest new games users might enjoy. The system leverages machine learning techniques including cosine similarity and vector embeddings to provide accurate recommendations. Additionally FastAPI's background_tasks feature is leveraged to ensure that our recommender_pipeline is rerun whenever a user adds a new game to their 'liked games' ensuring the recommendations remain up to date.
+This project highlights how to deploy a recommender system leveraging FastAPI and steam game data to recommend new games for a user based on games that they've previously expressed intrest in. The system leverages vector embeddings to convert the tags associated with each game into a vector and then uses a cosine similarity score to calculate which games are most like the games that a given user has interacted with. Additionally, FastAPI's background_tasks feature is leveraged to ensure that our recommender_pipeline is rerun whenever a user adds a new game to their library, ensuring the recommendations remain up to date.
 
 ## 🏗️ Architecture
 
@@ -16,9 +16,9 @@ This project delivers an intelligent board game recommendation engine that analy
 - **Containerization**: Docker
 
 ### **System Components**
-1. **PostgreSQL Database** - Stores user data, game information, tags, and recommendations
+1. **PostgreSQL Database** - Stores user data, Steam game information, genres, categories, and recommendations
 2. **FastAPI Application** - REST API for data access and recommendation generation
-3. **Background Task Engine** - Asynchronous recommendation processing
+3. **Background Task Engine** - Asynchronous recommendation processing using Steam game metadata
 4. **Docker Container** - Containerized deployment for consistency
 5. **CI/CD Pipeline** - Automated builds and deployments
 
@@ -27,19 +27,19 @@ This project delivers an intelligent board game recommendation engine that analy
 ### **Algorithm Workflow**
 The recommendation system runs as a FastAPI background task with the following pipeline:
 
-1. **Data Retrieval** - Fetch user's game history from `user_games` table
-2. **Tag Processing** - Load all game tags from `game_tags` table
-3. **Vector Creation** - Generate feature vectors for each game based on tags
-4. **User Profiling** - Create user preference vector from played games
-5. **Similarity Calculation** - Compute cosine similarity between user profile and all games
-6. **Recommendation Generation** - Select top-N similar games
-7. **Database Update** - Replace existing recommendations with new results
+1. **Data Retrieval** - Fetch user's Steam game library from `user_games` table
+2. **Vector Creation** - Generate feature vectors for each game based on Steam game tags
+3. **User Profiling** - Create user preference vector from owned/liked Steam games
+4. **Similarity Calculation** - Compute cosine similarity between user profile and all Steam games
+5. **Recommendation Generation** - Select top-N similar Steam games
+6. **Database Update** - Replace existing recommendations with new results
 
 ### **Key Features**
-- **Content-Based Filtering** using game tags and characteristics
+- **Content-Based Filtering** using Steam game genres, categories, and metadata
 - **Real-time Processing** via FastAPI background tasks
+- **Steam API Integration** for rich game data
 - **Scalable Architecture** with async processing
-- **Personalized Results** based on individual user preferences
+- **Personalized Results** based on individual Steam gaming preferences
 
 ## 🚀 Getting Started
 
@@ -64,22 +64,22 @@ The recommendation system runs as a FastAPI background task with the following p
 3. **Environment Configuration**
    Create a `.env` file in the project root:
    ```env
-   # Database Configuration
-   External_Database_Url= External Database URL retrieved from Render(or alternatively your database URL from another cloud service)
-   DB_PORT=5432
+   # This is our Database Connection URL from Render
+   External_Database_Url=postgresql://username:password@host:port/database
+   
    ```
 
 4. **Database Initialization**
-   Run the database setup script to create tables and populate initial data:
+   Run the database setup script to create tables and populate initial Steam game data:
    ```bash
    python src/load_database.py
    ```
    
    This script will:
    - Create all necessary database tables
-   - Load game data from CSV files
-   - Set up user and recommendation tables
-   - Verify database connectivity
+   - Load Steam game data from CSV files (steam_games.csv, steam_game_tags.csv, etc.)
+   - Set up user profiles and recommendation tables
+   - Verify database connectivity with Steam game schema
 
 5. **Start the Application**
    ```bash
@@ -115,13 +115,15 @@ docker push seelucas/fastapi_tutorial:fastapi_on_render
 
 ### **Core Endpoints**
 - `GET /` - Health check and API status
-- `POST /users/{user_id}/recommendations` - Trigger recommendation generation
-- `GET /users/{user_id}/recommendations` - Retrieve user recommendations
+- `POST /users/{user_id}/recommendations` - Trigger Steam game recommendation generation
+- `GET /users/{user_id}/recommendations` - Retrieve user's Steam game recommendations
+- `GET /games/{app_id}` - Get detailed Steam game information
 - `GET /docs` - Interactive API documentation
 
 ### **Database Endpoints**
-- User management and game data access
-- Recommendation retrieval and updates
+- User Steam library management and game data access
+- Steam game recommendation retrieval and updates
+- Steam game metadata queries (genres, categories, developers)
 - Health monitoring and diagnostics
 
 ## 🗂️ Project Structure
@@ -130,12 +132,18 @@ docker push seelucas/fastapi_tutorial:fastapi_on_render
 recommender_system/
 ├── src/
 │   ├── main.py                 # FastAPI application
-│   ├── models.py               # SQLAlchemy & Pydantic models
-│   ├── similarity_pipeline.py  # Recommendation algorithms
-│   ├── load_database.py        # Database initialization
+│   ├── models.py               # SQLAlchemy & Pydantic models for Steam games
+│   ├── similarity_pipeline.py  # Steam game recommendation algorithms
+│   ├── load_database.py        # Database initialization with Steam data
+│   ├── query_steam_api.py      # Steam API integration utilities
 │   └── utils/
 │       └── db_handler.py       # Database utilities
-├── Data/                       # CSV data files
+├── Data/                       # Steam game CSV data files
+│   ├── steam_games.csv         # Steam game catalog
+│   ├── steam_game_tags.csv     # Steam game tags and genres
+│   ├── steam_users.csv         # User profiles
+│   ├── steam_user_games.csv    # User Steam libraries
+│   └── user_recommendations.csv # Generated recommendations
 ├── .github/workflows/          # CI/CD configuration
 ├── Dockerfile                  # Container configuration
 ├── requirements.txt            # Python dependencies
@@ -146,15 +154,14 @@ recommender_system/
 
 ### **Environment Variables**
 - `External_Database_Url` - Complete PostgreSQL connection string
-- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` - Individual DB parameters
 
 ### **Database Tables**
-- `users` - User account information
-- `games` - Board game catalog
-- `game_tags` - Game characteristics and tags
-- `user_games` - User gaming history
-- `user_recommendations` - Generated recommendations
-- `game_similarity` - Precomputed similarity scores
+- `users` - User account information and Steam profiles
+- `games` - Steam game catalog with metadata (appid, name, genres, categories, etc.)
+- `game_tags` - Steam game tags, genres, and categories
+- `user_games` - User Steam libraries and game ownership
+- `user_recommendations` - Generated Steam game recommendations
+- `game_similarity` - Precomputed similarity scores between Steam games
 
 ## 🚀 Deployment
 
@@ -169,15 +176,38 @@ recommender_system/
 - Pushes to Docker Hub registry
 - Ready for deployment to any Docker-compatible platform
 
+## 🛠️ Development
 
-## 🤝 Contributing
+### **Running Tests**
+```bash
+# Run the Steam recommendation system test
+python src/similarity_pipeline.py
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+# Test Steam API integration
+python src/query_steam_api.py
+```
+
+### **Database Management**
+```bash
+# Check database connection
+python src/check_render_connection.py
+
+# Reload Steam game database
+python src/load_database.py
+```
+
+
+## 🆘 Support
+
+For issues and questions:
+- Check the [API documentation](http://localhost:8000/docs)
+- Review the Steam database connection scripts
+- Examine the CI/CD workflow files
+- Steam API documentation: [Steam Web API](https://steamcommunity.com/dev)
+
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
+---
+
+**Built with FastAPI, PostgreSQL, and Steam Web API

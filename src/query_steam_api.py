@@ -140,7 +140,7 @@ def pivot_tags(df):
 
 # calling methods
 game_df = get_all_games()
-game_info_df = get_game_data(game_df, n_games = 10)
+game_info_df = get_game_data(game_df, n_games = 2000)
 
 # writing to csv
 game_info_df.to_csv("Data/steam_games.csv", index=False)
